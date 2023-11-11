@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 
   for (auto elem : to) {
     QFile ofile(root_dir.path() + "/" + QString::fromStdString(elem.first) +
-                ".txt");
+                ".csv");
     qDebug() << ofile.fileName();
 
     ofile.open(QIODevice::WriteOnly | QIODevice::Truncate);
