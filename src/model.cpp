@@ -1,6 +1,5 @@
 #include "model.hpp"
 
-#include <OpenXLSX.hpp>
 #include <QFile>
 #include <set>
 
@@ -69,7 +68,6 @@ void Model::UpdateMaterials() {
 }
 
 void Model::ExportToViyar(QString name) const {
-  if (name == "") return;
 
   struct to_entry {
     int width;
@@ -112,9 +110,8 @@ void Model::ExportToViyar(QString name) const {
 
   for (auto elem : to) {
     QFile ofile(name + "/" + QString::fromStdString(elem.first) + ".csv");
-    if (!ofile.isOpen()) throw ExportException("Помилка збереження в файл");
-
     ofile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+    if (!ofile.isOpen()) throw ExportException("Помилка збереження в файл");
 
     for (auto line : elem.second) {
       QString const text =

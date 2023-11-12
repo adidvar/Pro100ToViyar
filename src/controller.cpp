@@ -77,8 +77,12 @@ void Controller::Import() {
 
 void Controller::ExportViyar() {
   try {
-    m_model->ExportToViyar(QFileDialog::getExistingDirectory(
-        nullptr, "Виберіть папку для збереження", {}));
+    auto url = QFileDialog::getExistingDirectory(
+        nullptr, "Виберіть папку для збереження", {});
+    if (url != "")
+      m_model->ExportToViyar(url);
+    else
+      return;
   } catch (ExportException e) {
     QMessageBox::warning(nullptr, "Помилка експорту", e.what());
     return;

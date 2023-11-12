@@ -18,17 +18,6 @@ file(GLOB PROJECT_SOURCES
      src/*.ui
 )
 
-Include(FetchContent)
-
-FetchContent_Declare(
-  OpenXLSL
-  GIT_REPOSITORY https://github.com/troldal/OpenXLSX.git
-  GIT_TAG        e39aa65 # release-1.10.0
-)
-
-FetchContent_MakeAvailable(OpenXLSL)
-
-
 include_directories(src)
 
 if (WIN32)
@@ -50,7 +39,7 @@ else()
         )
 endif()
 
-target_link_libraries(PRO100C PRIVATE Qt${QT_VERSION_MAJOR}::Widgets OpenXLSX::OpenXLSX )
+target_link_libraries(PRO100C PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 if(${QT_VERSION} VERSION_LESS 6.1.0)
   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.Adidvar.PRO100C)
