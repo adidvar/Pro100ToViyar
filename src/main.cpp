@@ -5,30 +5,9 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QVector>
+#include <view.hpp>
 
-struct from_entry {
-  int width;
-  int height;
-  int thickness;
-  int count;
-  QString material;
-};
-
-struct to_entry {
-  int width;
-  int height;
-  int count;
-  int up = 0;
-  int down = 0;
-  int left = 0;
-  int right = 0;
-  QString texture_rotate = "-";
-};
-
-struct to_struct {
-  QString hash;
-  std::vector<to_entry> entries;
-};
+struct from_entry {};
 
 QDir createDirectory(QString input) {
   QFileInfo info(input);
@@ -41,6 +20,17 @@ QDir createDirectory(QString input) {
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
 
+  auto model = new Model();
+  auto controller = new Controller();
+  controller->setModel(model);
+  auto view = new View();
+  view->setController(controller);
+
+  view->show();
+
+  return a.exec();
+
+  /*
   auto input_file = QFileDialog::getOpenFileName(
       nullptr, "Введіть файл з PRO100", {}, "*.txt");
   auto root_dir = createDirectory(input_file);
@@ -98,4 +88,5 @@ int main(int argc, char *argv[]) {
 
     ofile.close();
   }
+*/
 }
