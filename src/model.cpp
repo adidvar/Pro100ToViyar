@@ -18,21 +18,13 @@ const std::vector<TextureExchange> &Model::getExchange() const {
   return m_exchanges;
 }
 
-QString &Model::getBorderName() { return m_border_name; }
-
-InputBorder &Model::getBorderType() { return m_default_border; }
-
-const QString &Model::getBorderName() const { return m_border_name; }
-
-const InputBorder &Model::getBorderType() const { return m_default_border; }
-
 void Model::LoadFromFile(QString name) {
   QFile file(name);
   file.open(QIODevice::ReadOnly);
 
-  std::vector<InputFormat> from;
+  if (!file.isOpen()) throw ExportException("Помилка відкриття файлу");
 
-  std::set<QString> materials;
+  std::vector<InputFormat> from;
 
   while (!file.atEnd()) {
     auto array = file.readLine();
@@ -53,9 +45,19 @@ void Model::LoadFromFile(QString name) {
     e.setMaterial(parts[7]);
 
     from.push_back(e);
-    materials.insert(parts[7]);
   }
+  m_details = from;
 
+  UpdateMaterials();
+}
+
+void Model::UpdateMaterials() {
+  std::set<QString> materials;
+  for (auto detail : m_details) {
+    auto hash =
+        QString::number(detail.getThickness()) + "mm " + detail.getMaterial();
+    materials.insert(hash);
+  }
   std::vector<TextureExchange> exchange;
   for (auto elem : materials) {
     TextureExchange e;
@@ -64,10 +66,11 @@ void Model::LoadFromFile(QString name) {
   }
 
   m_exchanges = exchange;
-  m_details = from;
 }
 
 void Model::ExportToViyar(QString name) const {
+  if (name == "") return;
+
   struct to_entry {
     int width;
     int height;
@@ -90,7 +93,7 @@ void Model::ExportToViyar(QString name) const {
   for (auto f : m_details) {
     auto material = f.getMaterial();
     auto hash =
-        QString::number(f.getThickness()) + "mm " + exchangeTexture(material);
+        exchangeTexture(QString::number(f.getThickness()) + "mm " + material);
 
     to_entry e;
     e.name = f.getName();
@@ -98,21 +101,18 @@ void Model::ExportToViyar(QString name) const {
     e.height = f.getHeight();
     e.count = f.getCount();
 
-    e.up = ((f.getWidthBorder() != NOBORDER) ? m_default_border : NOBORDER)
-               .value();
-    e.down =
-        ((f.getWidthBorder() == BORDER2) ? m_default_border : NOBORDER).value();
+    e.up = ((f.getWidthBorder() != NOBORDER) ? BORDER1 : NOBORDER).value();
+    e.down = ((f.getWidthBorder() == BORDER2) ? BORDER1 : NOBORDER).value();
 
-    e.left = ((f.getHeightBorder() != NOBORDER) ? m_default_border : NOBORDER)
-                 .value();
-    e.right = ((f.getHeightBorder() == BORDER2) ? m_default_border : NOBORDER)
-                  .value();
+    e.left = ((f.getHeightBorder() != NOBORDER) ? BORDER1 : NOBORDER).value();
+    e.right = ((f.getHeightBorder() == BORDER2) ? BORDER1 : NOBORDER).value();
 
     to[hash.toStdString()].push_back(e);
   }
 
   for (auto elem : to) {
     QFile ofile(name + "/" + QString::fromStdString(elem.first) + ".csv");
+    if (!ofile.isOpen()) throw ExportException("Помилка збереження в файл");
 
     ofile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
 
@@ -128,72 +128,6 @@ void Model::ExportToViyar(QString name) const {
 
     ofile.close();
   }
-}
-
-void Model::ExportToGibLab(QString name) const {
-  if (m_border_name == "") throw ExportException("Не задана назва кромки");
-
-  struct to_entry {
-    QString material;
-    int height;
-    int width;
-    int count;
-    int texture_rotate = 1;
-    QString name;
-    int up = 0;
-    int down = 0;
-    int left = 0;
-    int right = 0;
-    QString description = "";
-  };
-
-  std::vector<to_entry> to;
-
-  for (auto f : m_details) {
-    auto material = f.getMaterial();
-
-    to_entry e;
-
-    e.material = exchangeTexture(material);
-    e.height = f.getHeight();
-    e.width = f.getWidth();
-    e.count = f.getCount();
-    e.name = f.getName();
-    e.up = ((f.getWidthBorder() != NOBORDER) ? m_default_border : NOBORDER)
-               .value();
-    e.down =
-        ((f.getWidthBorder() == BORDER2) ? m_default_border : NOBORDER).value();
-    e.left = ((f.getHeightBorder() != NOBORDER) ? m_default_border : NOBORDER)
-                 .value();
-    e.right = ((f.getHeightBorder() == BORDER2) ? m_default_border : NOBORDER)
-                  .value();
-
-    to.push_back(e);
-  }
-
-  using namespace OpenXLSX;
-  XLDocument doc;
-  doc.create(name.toStdString());
-  auto wks = doc.workbook().worksheet("Sheet1");
-
-  for (int i = 0; i < to.size(); i++) {
-    wks.cell(i + 1, 1).value() = to[i].material.toStdString();
-    wks.cell(i + 1, 2).value() = to[i].height;
-    wks.cell(i + 1, 3).value() = to[i].width;
-    wks.cell(i + 1, 4).value() = to[i].count;
-    wks.cell(i + 1, 5).value() = to[i].texture_rotate;
-    wks.cell(i + 1, 6).value() = to[i].name.toStdString();
-    wks.cell(i + 1, 7).value() = (to[i].up ? m_border_name.toStdString() : "");
-    wks.cell(i + 1, 8).value() =
-        (to[i].down ? m_border_name.toStdString() : "");
-    wks.cell(i + 1, 9).value() =
-        (to[i].left ? m_border_name.toStdString() : "");
-    wks.cell(i + 1, 10).value() =
-        (to[i].right ? m_border_name.toStdString() : "");
-    wks.cell(i + 1, 11).value() = to[i].description.toStdString();
-  }
-
-  doc.save();
 }
 
 QString Model::exchangeTexture(QString from) const {

@@ -13,13 +13,8 @@ class Model {
   const std::vector<InputFormat>& getData() const;
   const std::vector<TextureExchange>& getExchange() const;
 
-  QString& getBorderName();
-  InputBorder& getBorderType();
-
-  const QString& getBorderName() const;
-  const InputBorder& getBorderType() const;
-
   void LoadFromFile(QString name);
+  void UpdateMaterials();
 
   void ExportToViyar(QString name) const;
   void ExportToGibLab(QString name) const;
@@ -29,8 +24,6 @@ class Model {
 
   std::vector<InputFormat> m_details;
   std::vector<TextureExchange> m_exchanges;
-  QString m_border_name;
-  InputBorder m_default_border = BORDER1;
 };
 
 #endif // MODEL_HPP

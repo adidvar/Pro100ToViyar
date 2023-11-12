@@ -30,17 +30,9 @@ class View : public QWidget
 
   void on_exchanges_itemChanged(QTableWidgetItem *item);
 
-  void on_border_1_clicked();
-
-  void on_border_2_clicked();
-
-  void on_border_name_editingFinished();
-
   void on_pushButton_clicked();
 
   void on_delete_2_clicked();
-
-  void on_pushButton_2_clicked();
 
  private:
   Ui::View *ui;

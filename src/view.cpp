@@ -55,11 +55,6 @@ void View::UpdateFromModel() {
     ui->exchanges->setItem(i, 1, item);
   }
 
-  ui->border_1->setChecked(model->getBorderType() == BORDER1);
-  ui->border_2->setChecked(model->getBorderType() == BORDER2);
-
-  ui->border_name->setText(model->getBorderName());
-
   m_editing = false;
 }
 
@@ -81,26 +76,9 @@ void View::on_exchanges_itemChanged(QTableWidgetItem *item) {
   UpdateFromModel();
 }
 
-void View::on_border_1_clicked() {
-  m_controller->border1Selected();
-  UpdateFromModel();
-}
-
-void View::on_border_2_clicked() {
-  m_controller->border2Selected();
-  UpdateFromModel();
-}
-
-void View::on_border_name_editingFinished() {
-  m_controller->borderNameUpdated(ui->border_name->text());
-  UpdateFromModel();
-}
-
 void View::on_pushButton_clicked() { m_controller->ExportViyar(); }
 
 void View::on_delete_2_clicked() {
   m_controller->deleteDetail(ui->details->currentRow());
   UpdateFromModel();
 }
-
-void View::on_pushButton_2_clicked() { m_controller->ExportGibLab(); }

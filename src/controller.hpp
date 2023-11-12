@@ -14,16 +14,10 @@ class Controller
   void detailsTablesChanged(int row, int column, QString new_value);
   void exchangesTablesChanged(int row, int column, QString new_value);
 
-  void border1Selected();
-  void border2Selected();
-
-  void borderNameUpdated(QString name);
-
   void deleteDetail(int index);
 
   void Import();
   void ExportViyar();
-  void ExportGibLab();
 
  private:
   Model *m_model = nullptr;
